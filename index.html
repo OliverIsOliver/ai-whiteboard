@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Whiteboard</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <div class="top-ui">
+        <div class="main-menu-shell">
+          <button
+            type="button"
+            id="main-menu-trigger"
+            class="main-menu-trigger"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="main-menu-dropdown"
+            data-state="closed"
+            data-testid="main-menu-trigger"
+          >
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              role="img"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke-width="2"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <g stroke-width="1.5">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <line x1="4" y1="18" x2="20" y2="18"></line>
+              </g>
+            </svg>
+          </button>
+
+          <div
+            id="main-menu-dropdown"
+            class="main-menu-dropdown"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="main-menu-trigger"
+            hidden
+          >
+            <div class="main-menu-panel">
+              <button type="button" class="main-menu-item" role="menuitem" data-action="open">
+                <span class="main-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9.257 6.351.183.183H15.819c.34 0 .727.182 1.051.506.323.323.505.708.505 1.05v5.819c0 .316-.183.7-.52 1.035-.337.338-.723.522-1.037.522H4.182c-.352 0-.74-.181-1.058-.5-.318-.318-.499-.705-.499-1.057V5.182c0-.351.181-.736.5-1.054.32-.321.71-.503 1.057-.503H6.53l2.726 2.726Z" stroke-width="1.25"></path>
+                  </svg>
+                </span>
+                <span class="main-menu-item__text">Open</span>
+              </button>
+
+              <button type="button" class="main-menu-item" role="menuitem" data-action="save">
+                <span class="main-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke-width="1.25" d="M3.333 14.167v1.666c0 .92.747 1.667 1.667 1.667h10c.92 0 1.667-.746 1.667-1.667v-1.666M5.833 9.167 10 13.333l4.167-4.166M10 3.333v10"></path>
+                  </svg>
+                </span>
+                <span class="main-menu-item__text">Save to...</span>
+              </button>
+
+              <button type="button" class="main-menu-item" role="menuitem" data-action="export">
+                <span class="main-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <g stroke-width="1.25">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M15 8h.01"></path>
+                      <path d="M12 20h-5a3 3 0 0 1 -3 -3v-10a3 3 0 0 1 3 -3h10a3 3 0 0 1 3 3v5"></path>
+                      <path d="M4 15l4 -4c.928 -.893 2.072 -.893 3 0l4 4"></path>
+                      <path d="M14 14l1 -1c.617 -.593 1.328 -.793 2.009 -.598"></path>
+                      <path d="M19 16v6"></path>
+                      <path d="M22 19l-3 3l-3 -3"></path>
+                    </g>
+                  </svg>
+                </span>
+                <span class="main-menu-item__text">Export image...</span>
+              </button>
+
+              <button type="button" class="main-menu-item" role="menuitem" data-action="help">
+                <span class="main-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <g stroke-width="1.5">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <circle cx="12" cy="12" r="9"></circle>
+                      <line x1="12" y1="17" x2="12" y2="17.01"></line>
+                      <path d="M12 13.5a1.5 1.5 0 0 1 1 -1.5a2.6 2.6 0 1 0 -3 -4"></path>
+                    </g>
+                  </svg>
+                </span>
+                <span class="main-menu-item__text">Help</span>
+              </button>
+
+              <button type="button" class="main-menu-item" role="menuitem" data-action="reset">
+                <span class="main-menu-item__icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke-width="1.25" d="M3.333 5.833h13.334M8.333 9.167v5M11.667 9.167v5M4.167 5.833l.833 10c0 .92.746 1.667 1.667 1.667h6.666c.92 0 1.667-.746 1.667-1.667l.833-10M7.5 5.833v-2.5c0-.46.373-.833.833-.833h3.334c.46 0 .833.373.833.833v2.5"></path>
+                  </svg>
+                </span>
+                <span class="main-menu-item__text">Reset the canvas</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <header class="toolbar-shell">
+          <section class="toolbar" aria-labelledby="tools-title">
+            <h2 class="visually-hidden" id="tools-title">Tools</h2>
+            <div class="toolbar-group" role="toolbar" aria-label="Whiteboard tools">
+              <button
+                class="tool-icon"
+                data-tool="pointer"
+                type="button"
+                aria-pressed="false"
+                title="Selection — C"
+              >
+                <span class="tool-icon__glyph" aria-hidden="true">
+                  <svg viewBox="0 0 22 22" fill="none" stroke-width="1.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <g>
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path class="pointer-body" d="M6 6l4.153 11.793a0.365 .365 0 0 0 .331 .207a0.366 .366 0 0 0 .332 -.207l2.184 -4.793l4.787 -1.994a0.355 .355 0 0 0 .213 -.323a0.355 .355 0 0 0 -.213 -.323l-11.787 -4.36z"></path>
+                      <path class="pointer-tail" d="M13.5 13.5l4.5 4.5"></path>
+                    </g>
+                  </svg>
+                </span>
+                <span class="tool-icon__key">C</span>
+              </button>
+              <div class="toolbar-divider" aria-hidden="true"></div>
+              <button
+                class="tool-icon is-active"
+                data-tool="draw"
+                type="button"
+                aria-pressed="true"
+                title="Draw — D"
+              >
+                <span class="tool-icon__glyph" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <g stroke-width="1.25">
+                      <path class="draw-body" d="m7.643 15.69 7.774-7.773a2.357 2.357 0 1 0-3.334-3.334L4.31 12.357a3.333 3.333 0 0 0-.977 2.357v1.953h1.953c.884 0 1.732-.352 2.357-.977Z"></path>
+                      <path class="draw-detail" d="m11.25 5.417 3.333 3.333"></path>
+                    </g>
+                  </svg>
+                </span>
+                <span class="tool-icon__key">D</span>
+              </button>
+              <div class="toolbar-divider" aria-hidden="true"></div>
+              <button
+                class="tool-icon"
+                data-tool="erase"
+                type="button"
+                aria-pressed="false"
+                title="Eraser — E"
+              >
+                <span class="tool-icon__glyph" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <g stroke-width="1.5">
+                      <path class="erase-body" d="M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l10 -10a1 1 0 0 1 1.41 0l5 5a1 1 0 0 1 0 1.41l-9.2 9.3"></path>
+                      <path class="erase-detail" d="M18 13.3l-6.3 -6.3"></path>
+                    </g>
+                  </svg>
+                </span>
+                <span class="tool-icon__key">E</span>
+              </button>
+            </div>
+          </section>
+        </header>
+      </div>
+
+      <aside class="draw-panel Island App-menu__left" hidden>
+        <div class="selected-shape-actions">
+          <div>
+            <h3 aria-hidden="true">Stroke</h3>
+            <div>
+              <div role="dialog" aria-modal="true" class="color-picker-container">
+                <div class="color-picker__top-picks" role="group" aria-label="Stroke color">
+                  <button class="color-picker__button active" type="button" title="#1e1e1e" data-stroke-color="#1e1e1e" style="--swatch-color: #1e1e1e;">
+                    <div class="color-picker__button-outline"></div>
+                  </button>
+                  <button class="color-picker__button" type="button" title="#e03131" data-stroke-color="#e03131" style="--swatch-color: #e03131;">
+                    <div class="color-picker__button-outline"></div>
+                  </button>
+                  <button class="color-picker__button" type="button" title="#2f9e44" data-stroke-color="#2f9e44" style="--swatch-color: #2f9e44;">
+                    <div class="color-picker__button-outline"></div>
+                  </button>
+                  <button class="color-picker__button" type="button" title="#1971c2" data-stroke-color="#1971c2" style="--swatch-color: #1971c2;">
+                    <div class="color-picker__button-outline"></div>
+                  </button>
+                  <button class="color-picker__button" type="button" title="#f08c00" data-stroke-color="#f08c00" style="--swatch-color: #f08c00;">
+                    <div class="color-picker__button-outline"></div>
+                  </button>
+                </div>
+                <div class="draw-panel-divider" aria-hidden="true"></div>
+                <button
+                  type="button"
+                  aria-haspopup="dialog"
+                  aria-expanded="false"
+                  data-state="closed"
+                  class="color-picker__button active-color properties-trigger"
+                  aria-label="Stroke"
+                  title="Show stroke color picker"
+                  data-openpopup="elementStroke"
+                  style="--swatch-color: #1e1e1e;"
+                >
+                  <div class="color-picker__button-outline"></div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <fieldset>
+            <legend>Stroke width</legend>
+            <div class="buttonList">
+              <label class="width-option" title="Thin">
+                <input data-stroke-width="2" data-testid="strokeWidth-thin" type="radio" name="stroke-width" value="2" />
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4.167 10h11.666" stroke-width="1.25"></path>
+                </svg>
+              </label>
+              <label class="width-option active" title="Bold">
+                <input data-stroke-width="4" data-testid="strokeWidth-bold" type="radio" name="stroke-width" value="4" checked />
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 10h10" stroke-width="2.5"></path>
+                </svg>
+              </label>
+              <label class="width-option" title="Extra bold">
+                <input data-stroke-width="6" data-testid="strokeWidth-extraBold" type="radio" name="stroke-width" value="6" />
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 10h10" stroke-width="3.75"></path>
+                </svg>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="control-label">
+            Opacity
+            <div class="range-wrapper">
+              <input min="0" max="100" step="10" class="range-input draw-panel__range" data-testid="opacity" type="range" value="100" />
+              <div class="value-bubble draw-panel__value">100</div>
+              <div class="zero-label">0</div>
+            </div>
+          </label>
+        </div>
+      </aside>
+
+      <canvas id="board" aria-label="Whiteboard canvas"></canvas>
+    </main>
+
+    <script type="module" src="/src/app.ts"></script>
+  </body>
+</html>
