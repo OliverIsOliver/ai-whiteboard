@@ -17,6 +17,7 @@ import {
   zoomResetButton,
 } from "./dom";
 import { redoHistory, undoHistory } from "./history";
+import { installProgrammaticApi } from "./programmaticApi";
 import { copySelectedStrokes, deleteSelectedStrokes, groupSelectedStrokes, pasteClipboard } from "./selection";
 import { DRAW_TOOL, state, ZOOM_STEP } from "./state";
 import { panBy, redraw, resizeCanvas, setZoom } from "./render";
@@ -271,3 +272,4 @@ resizeCanvas();
 syncZoomControls();
 syncHistoryControls();
 syncCanvasCursor();
+installProgrammaticApi();

@@ -1,5 +1,5 @@
 import { canvas, context } from "./dom";
-import { drawEraserCursor, drawEraserTrail } from "./erase";
+import { drawEraserTrail } from "./erase";
 import { getSelectionBounds, normalizeRectangle } from "./selection";
 import {
   ERASE_TOOL,
@@ -138,7 +138,7 @@ function renderScene(): void {
 
   state.strokes.forEach((stroke) => {
     if (pendingEraseIds.has(stroke.id)) {
-      drawStroke(stroke, ERASE_TOOL.previewColor, ERASE_TOOL.previewOpacity);
+      drawStroke(stroke, stroke.color, ERASE_TOOL.previewOpacity);
     }
   });
 
@@ -147,10 +147,6 @@ function renderScene(): void {
   }
 
   drawEraserTrail(state.eraseTrail);
-
-  if (state.activeTool === "erase" && state.pointerInsideCanvas && state.pointerPosition) {
-    drawEraserCursor(state.pointerPosition);
-  }
 
   context.restore();
 }

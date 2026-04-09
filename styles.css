@@ -388,6 +388,7 @@ body {
   width: 12.5rem;
   box-sizing: border-box;
   background-color: var(--panel);
+  border: 1px solid var(--panel-border);
   box-shadow: var(--panel-shadow);
   border-radius: 10px;
 }
@@ -506,6 +507,18 @@ body {
   box-sizing: border-box;
 }
 
+.color-picker__top-picks .color-picker__button {
+  background-color: transparent;
+}
+
+.color-picker__top-picks .color-picker__button::before {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border-radius: calc(var(--radius) - 1px);
+  background-color: var(--swatch-color);
+}
+
 .color-picker__button:hover:not(.active):not(.color-picker__button--large) {
   transform: scale(1.075);
 }
@@ -523,15 +536,11 @@ body {
 }
 
 .color-picker__button.active .color-picker__button-outline {
-  position: absolute;
-  --offset: -1px;
-  top: var(--offset);
-  left: var(--offset);
-  right: var(--offset);
-  bottom: var(--offset);
-  box-shadow: 0 0 0 1px var(--color-primary-darkest);
-  z-index: 1;
-  border-radius: var(--radius);
+  display: none;
+}
+
+.color-picker__button.active {
+  box-shadow: 0 0 0 2px #d9d7ff;
 }
 
 .color-picker__button:focus-visible {
