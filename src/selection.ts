@@ -1,28 +1,11 @@
+import { getStrokeOutlineAsPoints, getStrokeOutlineBounds } from "./freeDraw";
 import { state, POINTER_HIT_PADDING, ROTATION_HANDLE_OFFSET } from "./state";
 import { beginHistoryTransaction, commitHistoryTransaction } from "./history";
 import { pointToPointDistanceSquared, square, strokeIntersectsCircle } from "./strokeGeometry";
 import type { DrawStroke, Point, Rectangle, ResizeHandle, SelectionBounds, StrokeSnapshot } from "./types";
 
 export function getStrokeBounds(stroke: DrawStroke): Rectangle {
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  const padding = stroke.width / 2 + POINTER_HIT_PADDING;
-
-  stroke.points.forEach((point) => {
-    minX = Math.min(minX, point.x);
-    minY = Math.min(minY, point.y);
-    maxX = Math.max(maxX, point.x);
-    maxY = Math.max(maxY, point.y);
-  });
-
-  return {
-    x: minX - padding,
-    y: minY - padding,
-    width: maxX - minX + padding * 2,
-    height: maxY - minY + padding * 2,
-  };
+  return getStrokeOutlineBounds(stroke, POINTER_HIT_PADDING);
 }
 
 export function rectanglesIntersect(a: Rectangle, b: Rectangle): boolean {
@@ -101,14 +84,15 @@ export function getSelectionBounds(): SelectionBounds | null {
   let maxY = -Infinity;
 
   selected.forEach((stroke) => {
-    const padding = stroke.width / 2 + POINTER_HIT_PADDING;
+    const outline = getStrokeOutlineAsPoints(stroke);
+    const points = outline.length > 0 ? outline : stroke.points;
 
-    stroke.points.forEach((point) => {
+    points.forEach((point) => {
       const local = rotatePoint(point, { x: centerX, y: centerY }, -angle);
-      minX = Math.min(minX, local.x - padding);
-      minY = Math.min(minY, local.y - padding);
-      maxX = Math.max(maxX, local.x + padding);
-      maxY = Math.max(maxY, local.y + padding);
+      minX = Math.min(minX, local.x - POINTER_HIT_PADDING);
+      minY = Math.min(minY, local.y - POINTER_HIT_PADDING);
+      maxX = Math.max(maxX, local.x + POINTER_HIT_PADDING);
+      maxY = Math.max(maxY, local.y + POINTER_HIT_PADDING);
     });
   });
 
@@ -374,6 +358,7 @@ export function copySelectedStrokes(): void {
   state.clipboardStrokes = selected.map((stroke) => ({
     ...stroke,
     points: stroke.points.map((point) => ({ ...point })),
+    pressures: [...stroke.pressures],
   }));
   state.clipboardPasteCount = 0;
 }
@@ -406,6 +391,7 @@ export function pasteClipboard(): void {
       ...stroke,
       id: state.nextStrokeId,
       groupId: nextGroupId,
+      pressures: [...stroke.pressures],
       points: stroke.points.map((point) => ({
         x: point.x + offset,
         y: point.y + offset,

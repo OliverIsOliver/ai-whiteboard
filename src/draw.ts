@@ -7,6 +7,8 @@ export function startDraw(point: Point): void {
   const stroke: DrawStroke = {
     id: state.nextStrokeId,
     points: [point],
+    pressures: [],
+    simulatePressure: true,
     color: DRAW_TOOL.strokeColor,
     width: DRAW_TOOL.strokeWidth,
     opacity: DRAW_TOOL.strokeOpacity,

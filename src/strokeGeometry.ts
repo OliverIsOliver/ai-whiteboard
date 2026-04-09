@@ -1,3 +1,4 @@
+import { getStrokeOutlineAsPoints, getStrokeOutlineBounds } from "./freeDraw";
 import type { DrawStroke, Point } from "./types";
 
 export function square(value: number): number {
@@ -80,15 +81,58 @@ function segmentToSegmentDistanceSquared(aStart: Point, aEnd: Point, bStart: Poi
   );
 }
 
-export function strokeIntersectsCircle(stroke: DrawStroke, center: Point, radius: number): boolean {
-  const thresholdSquared = square(radius + stroke.width / 2);
+function pointInPolygon(point: Point, polygon: Point[]): boolean {
+  if (polygon.length < 3) {
+    return false;
+  }
 
-  if (stroke.points.length === 1) {
+  let inside = false;
+
+  for (let index = 0, previousIndex = polygon.length - 1; index < polygon.length; previousIndex = index, index += 1) {
+    const current = polygon[index];
+    const previous = polygon[previousIndex];
+    const intersects =
+      current.y > point.y !== previous.y > point.y &&
+      point.x < ((previous.x - current.x) * (point.y - current.y)) / ((previous.y - current.y) || 1e-7) + current.x;
+
+    if (intersects) {
+      inside = !inside;
+    }
+  }
+
+  return inside;
+}
+
+export function strokeIntersectsCircle(stroke: DrawStroke, center: Point, radius: number): boolean {
+  const outline = getStrokeOutlineAsPoints(stroke);
+
+  if (outline.length < 2) {
+    const thresholdSquared = square(radius + stroke.width / 2);
     return pointToPointDistanceSquared(stroke.points[0], center) <= thresholdSquared;
   }
 
-  for (let index = 1; index < stroke.points.length; index += 1) {
-    if (pointToSegmentDistanceSquared(center, stroke.points[index - 1], stroke.points[index]) <= thresholdSquared) {
+  const bounds = getStrokeOutlineBounds(stroke, radius);
+
+  if (
+    center.x < bounds.x ||
+    center.x > bounds.x + bounds.width ||
+    center.y < bounds.y ||
+    center.y > bounds.y + bounds.height
+  ) {
+    return false;
+  }
+
+  if (pointInPolygon(center, outline)) {
+    return true;
+  }
+
+  const thresholdSquared = square(radius);
+
+  for (let index = 0; index < outline.length; index += 1) {
+    const current = outline[index];
+    const next = outline[(index + 1) % outline.length];
+
+    if (pointToSegmentDistanceSquared(center, current, next) <= thresholdSquared) {
       return true;
     }
   }
@@ -97,14 +141,41 @@ export function strokeIntersectsCircle(stroke: DrawStroke, center: Point, radius
 }
 
 export function strokeIntersectsSegment(stroke: DrawStroke, start: Point, end: Point, radius: number): boolean {
-  const thresholdSquared = square(radius + stroke.width / 2);
+  const outline = getStrokeOutlineAsPoints(stroke);
 
-  if (stroke.points.length === 1) {
+  if (outline.length < 2) {
+    const thresholdSquared = square(radius + stroke.width / 2);
     return pointToSegmentDistanceSquared(stroke.points[0], start, end) <= thresholdSquared;
   }
 
-  for (let index = 1; index < stroke.points.length; index += 1) {
-    if (segmentToSegmentDistanceSquared(start, end, stroke.points[index - 1], stroke.points[index]) <= thresholdSquared) {
+  const bounds = getStrokeOutlineBounds(stroke, radius);
+  const segmentBounds = {
+    x: Math.min(start.x, end.x) - radius,
+    y: Math.min(start.y, end.y) - radius,
+    width: Math.abs(end.x - start.x) + radius * 2,
+    height: Math.abs(end.y - start.y) + radius * 2,
+  };
+
+  if (
+    segmentBounds.x > bounds.x + bounds.width ||
+    segmentBounds.x + segmentBounds.width < bounds.x ||
+    segmentBounds.y > bounds.y + bounds.height ||
+    segmentBounds.y + segmentBounds.height < bounds.y
+  ) {
+    return false;
+  }
+
+  if (pointInPolygon(start, outline) || pointInPolygon(end, outline)) {
+    return true;
+  }
+
+  const thresholdSquared = square(radius);
+
+  for (let index = 0; index < outline.length; index += 1) {
+    const current = outline[index];
+    const next = outline[(index + 1) % outline.length];
+
+    if (segmentToSegmentDistanceSquared(start, end, current, next) <= thresholdSquared) {
       return true;
     }
   }

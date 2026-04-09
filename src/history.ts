@@ -7,6 +7,7 @@ function cloneStroke(stroke: DrawStroke): DrawStroke {
   return {
     ...stroke,
     points: stroke.points.map((point) => ({ ...point })),
+    pressures: [...stroke.pressures],
   };
 }
 
@@ -50,9 +51,17 @@ function snapshotsEqual(a: HistorySnapshot, b: HistorySnapshot): boolean {
       left.opacity !== right.opacity ||
       left.groupId !== right.groupId ||
       left.rotation !== right.rotation ||
+      left.simulatePressure !== right.simulatePressure ||
+      left.pressures.length !== right.pressures.length ||
       left.points.length !== right.points.length
     ) {
       return false;
+    }
+
+    for (let pressureIndex = 0; pressureIndex < left.pressures.length; pressureIndex += 1) {
+      if (left.pressures[pressureIndex] !== right.pressures[pressureIndex]) {
+        return false;
+      }
     }
 
     for (let pointIndex = 0; pointIndex < left.points.length; pointIndex += 1) {
