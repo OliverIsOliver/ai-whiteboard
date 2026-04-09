@@ -72,6 +72,12 @@ export type PointerGesture =
     }
   | null;
 
+export type PanGesture = {
+  startScreen: Point;
+  originOffsetX: number;
+  originOffsetY: number;
+} | null;
+
 export type DrawToolConfig = {
   strokeColor: string;
   strokeWidth: number;
@@ -90,4 +96,11 @@ export type EraseToolConfig = {
   trailKeepHead: boolean;
   trailMaxPoints: number;
   trailMaxLength: number;
+};
+
+export type HistorySnapshot = {
+  strokes: DrawStroke[];
+  selectedStrokeIds: number[];
+  nextStrokeId: number;
+  nextGroupId: number;
 };

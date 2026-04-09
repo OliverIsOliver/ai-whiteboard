@@ -1,4 +1,5 @@
 import { state, POINTER_HIT_PADDING, ROTATION_HANDLE_OFFSET } from "./state";
+import { beginHistoryTransaction, commitHistoryTransaction } from "./history";
 import { pointToPointDistanceSquared, square, strokeIntersectsCircle } from "./strokeGeometry";
 import type { DrawStroke, Point, Rectangle, ResizeHandle, SelectionBounds, StrokeSnapshot } from "./types";
 
@@ -357,8 +358,10 @@ export function deleteSelectedStrokes(): void {
     return;
   }
 
+  beginHistoryTransaction();
   state.strokes = state.strokes.filter((stroke) => !state.selectedStrokeIds.has(stroke.id));
   clearSelection();
+  commitHistoryTransaction();
 }
 
 export function copySelectedStrokes(): void {
@@ -380,6 +383,7 @@ export function pasteClipboard(): void {
     return;
   }
 
+  beginHistoryTransaction();
   state.clipboardPasteCount += 1;
   const offset = 24 * state.clipboardPasteCount;
   const groupIdMap = new Map<number, number>();
@@ -415,6 +419,7 @@ export function pasteClipboard(): void {
 
   state.strokes.push(...clones);
   setSelectedStrokeIds(newSelectedIds);
+  commitHistoryTransaction();
 }
 
 export function groupSelectedStrokes(): void {
@@ -422,6 +427,7 @@ export function groupSelectedStrokes(): void {
     return;
   }
 
+  beginHistoryTransaction();
   const groupId = state.nextGroupId;
   state.nextGroupId += 1;
 
@@ -430,4 +436,5 @@ export function groupSelectedStrokes(): void {
       stroke.groupId = groupId;
     }
   });
+  commitHistoryTransaction();
 }

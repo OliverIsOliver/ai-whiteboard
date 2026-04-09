@@ -1,7 +1,15 @@
 import { canvas, context } from "./dom";
 import { drawEraserCursor, drawEraserTrail } from "./erase";
 import { getSelectionBounds, normalizeRectangle } from "./selection";
-import { ERASE_TOOL, SELECTION_FILL, SELECTION_HANDLE_SIZE, SELECTION_STROKE, state } from "./state";
+import {
+  ERASE_TOOL,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  SELECTION_FILL,
+  SELECTION_HANDLE_SIZE,
+  SELECTION_STROKE,
+  state,
+} from "./state";
 import type { DrawStroke, Point } from "./types";
 
 export function configureStrokeStyle(strokeColor: string, strokeWidth: number): void {
@@ -46,7 +54,7 @@ export function drawStroke(stroke: DrawStroke, strokeColor = stroke.color, opaci
 }
 
 function drawSelectionHandle(center: Point): void {
-  const size = SELECTION_HANDLE_SIZE;
+  const size = SELECTION_HANDLE_SIZE / state.zoom;
   const halfSize = size / 2;
 
   context.beginPath();
@@ -66,7 +74,7 @@ function drawSelectionOverlay(): void {
   context.save();
   context.strokeStyle = SELECTION_STROKE;
   context.fillStyle = SELECTION_FILL;
-  context.lineWidth = 1.25;
+  context.lineWidth = 1.25 / state.zoom;
 
   if (marquee && (marquee.width > 0 || marquee.height > 0)) {
     context.setLineDash([6, 4]);
@@ -109,13 +117,17 @@ function drawSelectionOverlay(): void {
   drawSelectionHandle(selectionBounds.corners.se);
 
   context.beginPath();
-  context.arc(selectionBounds.rotationHandle.x, selectionBounds.rotationHandle.y, 4, 0, Math.PI * 2);
+  context.arc(selectionBounds.rotationHandle.x, selectionBounds.rotationHandle.y, 4 / state.zoom, 0, Math.PI * 2);
   context.fill();
   context.stroke();
   context.restore();
 }
 
 function renderScene(): void {
+  context.save();
+  context.translate(state.offsetX, state.offsetY);
+  context.scale(state.zoom, state.zoom);
+
   const pendingEraseIds = state.pendingEraseIds;
 
   state.strokes.forEach((stroke) => {
@@ -139,6 +151,8 @@ function renderScene(): void {
   if (state.activeTool === "erase" && state.pointerInsideCanvas && state.pointerPosition) {
     drawEraserCursor(state.pointerPosition);
   }
+
+  context.restore();
 }
 
 export function redraw(): void {
@@ -147,6 +161,8 @@ export function redraw(): void {
   context.filter = "none";
   context.globalAlpha = 1;
   context.clearRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
   context.scale(pixelRatio, pixelRatio);
   renderScene();
 }
@@ -181,5 +197,34 @@ export function resizeCanvas(): void {
   canvas.height = Math.floor(window.innerHeight * pixelRatio);
   canvas.style.width = `${window.innerWidth}px`;
   canvas.style.height = `${window.innerHeight}px`;
+
+  if (!state.viewportInitialized) {
+    state.offsetX = window.innerWidth / 2;
+    state.offsetY = window.innerHeight / 2;
+    state.viewportInitialized = true;
+  }
+
+  redraw();
+}
+
+export function screenToScene(point: Point): Point {
+  return {
+    x: (point.x - state.offsetX) / state.zoom,
+    y: (point.y - state.offsetY) / state.zoom,
+  };
+}
+
+export function setZoom(nextZoom: number, anchor: Point = { x: window.innerWidth / 2, y: window.innerHeight / 2 }): void {
+  const zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, nextZoom));
+  const sceneAnchor = screenToScene(anchor);
+  state.zoom = zoom;
+  state.offsetX = anchor.x - sceneAnchor.x * zoom;
+  state.offsetY = anchor.y - sceneAnchor.y * zoom;
+  redraw();
+}
+
+export function panBy(dx: number, dy: number): void {
+  state.offsetX += dx;
+  state.offsetY += dy;
   redraw();
 }

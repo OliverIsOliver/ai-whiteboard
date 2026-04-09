@@ -1,7 +1,9 @@
 import { DRAW_POINT_SPACING, DRAW_TOOL, state } from "./state";
+import { beginHistoryTransaction, commitHistoryTransaction } from "./history";
 import type { DrawStroke, Point } from "./types";
 
 export function startDraw(point: Point): void {
+  beginHistoryTransaction();
   const stroke: DrawStroke = {
     id: state.nextStrokeId,
     points: [point],
@@ -38,4 +40,5 @@ export function finishDraw(): void {
   }
 
   state.currentStroke = null;
+  commitHistoryTransaction();
 }

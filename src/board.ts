@@ -1,6 +1,7 @@
 import { canvas } from "./dom";
 import { extendDraw, finishDraw, startDraw } from "./draw";
 import { extendErase, finishErase, startErase } from "./erase";
+import { beginHistoryTransaction, commitHistoryTransaction } from "./history";
 import {
   applyMoveSelection,
   applyRotateSelection,
@@ -19,10 +20,20 @@ import {
   updateSelectionFromMarquee,
 } from "./selection";
 import { state } from "./state";
-import { cancelAnimatedRedraw, redraw, requestAnimatedRedraw } from "./render";
+import { cancelAnimatedRedraw, redraw, requestAnimatedRedraw, screenToScene } from "./render";
 import type { Point } from "./types";
+import { syncCanvasCursor } from "./ui";
 
 export function getCanvasPoint(event: PointerEvent): Point {
+  const rect = canvas.getBoundingClientRect();
+
+  return screenToScene({
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top,
+  });
+}
+
+function getScreenPoint(event: PointerEvent): Point {
   const rect = canvas.getBoundingClientRect();
 
   return {
@@ -31,13 +42,31 @@ export function getCanvasPoint(event: PointerEvent): Point {
   };
 }
 
+function shouldStartPan(event: PointerEvent): boolean {
+  return state.spacePressed || event.button === 1;
+}
+
 export function startInteraction(event: PointerEvent): void {
   event.preventDefault();
 
   const point = getCanvasPoint(event);
+  const screenPoint = getScreenPoint(event);
   state.pointerDown = true;
   state.pointerInsideCanvas = true;
   state.pointerPosition = point;
+
+  if (shouldStartPan(event)) {
+    state.panGesture = {
+      startScreen: screenPoint,
+      originOffsetX: state.offsetX,
+      originOffsetY: state.offsetY,
+    };
+    state.pointerGesture = null;
+    syncCanvasCursor();
+    canvas.setPointerCapture(event.pointerId);
+    redraw();
+    return;
+  }
 
   if (state.activeTool === "pointer") {
     const selectionBounds = getSelectionBounds();
@@ -46,6 +75,7 @@ export function startInteraction(event: PointerEvent): void {
       selectionBounds && state.selectedStrokeIds.size > 0 ? getResizeHandleAtPoint(point, selectionBounds) : null;
 
     if (selectionBounds && state.selectedStrokeIds.size > 0 && resizeHandle) {
+      beginHistoryTransaction();
       state.pointerGesture = {
         mode: "resize",
         handle: resizeHandle,
@@ -57,6 +87,7 @@ export function startInteraction(event: PointerEvent): void {
       state.selectedStrokeIds.size > 0 &&
       pointHitsRotationHandle(point, selectionBounds.rotationHandle)
     ) {
+      beginHistoryTransaction();
       state.pointerGesture = {
         mode: "rotate",
         center: { x: selectionBounds.centerX, y: selectionBounds.centerY },
@@ -64,6 +95,7 @@ export function startInteraction(event: PointerEvent): void {
         snapshot: cloneStrokePoints(state.selectedStrokeIds),
       };
     } else if (selectionBounds && state.selectedStrokeIds.size > 0 && pointInSelectionBounds(point, selectionBounds)) {
+      beginHistoryTransaction();
       state.pointerGesture = {
         mode: "move",
         start: point,
@@ -75,6 +107,7 @@ export function startInteraction(event: PointerEvent): void {
       if (hitStroke) {
         const strokeIds = getStrokeSelectionIds(hitStroke);
         setSelectedStrokeIds(strokeIds);
+        beginHistoryTransaction();
         state.pointerGesture = {
           mode: "move",
           start: point,
@@ -108,6 +141,7 @@ export function startInteraction(event: PointerEvent): void {
 
 export function extendInteraction(event: PointerEvent): void {
   const point = getCanvasPoint(event);
+  const screenPoint = getScreenPoint(event);
   state.pointerPosition = point;
   state.pointerInsideCanvas = true;
 
@@ -116,6 +150,13 @@ export function extendInteraction(event: PointerEvent): void {
       redraw();
       requestAnimatedRedraw();
     }
+    return;
+  }
+
+  if (state.panGesture) {
+    state.offsetX = state.panGesture.originOffsetX + (screenPoint.x - state.panGesture.startScreen.x);
+    state.offsetY = state.panGesture.originOffsetY + (screenPoint.y - state.panGesture.startScreen.y);
+    redraw();
     return;
   }
 
@@ -165,8 +206,12 @@ export function endInteraction(event: PointerEvent): void {
 
   state.pointerDown = false;
 
-  if (state.activeTool === "pointer") {
+  if (state.panGesture) {
+    state.panGesture = null;
+    syncCanvasCursor();
+  } else if (state.activeTool === "pointer") {
     state.pointerGesture = null;
+    commitHistoryTransaction();
   } else if (state.activeTool === "draw") {
     finishDraw();
   } else {
@@ -201,6 +246,7 @@ export function handlePointerLeave(): void {
 }
 
 export function resetCanvas(): void {
+  beginHistoryTransaction();
   state.strokes = [];
   state.currentStroke = null;
   clearSelection();
@@ -208,6 +254,8 @@ export function resetCanvas(): void {
   state.eraseTrail = [];
   state.pendingEraseIds.clear();
   state.pointerDown = false;
+  state.panGesture = null;
   cancelAnimatedRedraw();
+  commitHistoryTransaction();
   redraw();
 }

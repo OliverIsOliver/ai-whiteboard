@@ -9,10 +9,27 @@ import {
   strokeColorButtons,
   strokeWidthInputs,
   toolButtons,
+  undoButton,
+  redoButton,
+  zoomResetButton,
 } from "./dom";
 import { DRAW_TOOL, state } from "./state";
 import { redraw } from "./render";
 import type { Tool } from "./types";
+
+export function syncCanvasCursor(): void {
+  if (state.panGesture) {
+    canvas.style.cursor = "grabbing";
+    return;
+  }
+
+  if (state.spacePressed) {
+    canvas.style.cursor = "grab";
+    return;
+  }
+
+  canvas.style.cursor = state.activeTool === "draw" ? "crosshair" : state.activeTool === "erase" ? "none" : "default";
+}
 
 export function updateDrawPanelVisibility(): void {
   if (!drawPanel) {
@@ -78,7 +95,7 @@ export function syncDrawControls(): void {
 
 export function setActiveTool(tool: Tool): void {
   state.activeTool = tool;
-  canvas.style.cursor = tool === "draw" ? "crosshair" : tool === "erase" ? "none" : "default";
+  syncCanvasCursor();
 
   toolButtons.forEach((button) => {
     const isActive = button.dataset.tool === tool;
@@ -98,4 +115,32 @@ export function setActiveTool(tool: Tool): void {
   }
 
   redraw();
+}
+
+export function syncZoomControls(): void {
+  if (!zoomResetButton) {
+    return;
+  }
+
+  zoomResetButton.textContent = `${Math.round(state.zoom * 100)}%`;
+}
+
+export function syncHistoryControls(): void {
+  if (undoButton) {
+    undoButton.disabled = state.historyPast.length === 0;
+    const icon = undoButton.querySelector<HTMLElement>(".ToolIcon__icon");
+
+    if (icon) {
+      icon.setAttribute("aria-disabled", String(state.historyPast.length === 0));
+    }
+  }
+
+  if (redoButton) {
+    redoButton.disabled = state.historyFuture.length === 0;
+    const icon = redoButton.querySelector<HTMLElement>(".ToolIcon__icon");
+
+    if (icon) {
+      icon.setAttribute("aria-disabled", String(state.historyFuture.length === 0));
+    }
+  }
 }

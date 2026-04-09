@@ -1,4 +1,5 @@
 import { context } from "./dom";
+import { beginHistoryTransaction, commitHistoryTransaction } from "./history";
 import { ERASE_TOOL, state } from "./state";
 import { expandStrokeIdsByGroup, setSelectedStrokeIds } from "./selection";
 import { strokeIntersectsCircle, strokeIntersectsSegment } from "./strokeGeometry";
@@ -436,6 +437,7 @@ export function markPendingEraseAlongSegment(start: Point, end: Point): void {
 }
 
 export function startErase(point: Point): void {
+  beginHistoryTransaction();
   state.eraseTrail = [{ ...point, timestamp: performance.now() }];
   state.pendingEraseIds.clear();
   markPendingEraseAtPoint(point);
@@ -464,4 +466,5 @@ export function finishErase(): void {
 
   state.pendingEraseIds.clear();
   state.eraseTrail = [];
+  commitHistoryTransaction();
 }
