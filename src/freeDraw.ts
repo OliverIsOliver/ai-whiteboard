@@ -2,7 +2,7 @@ import { getStroke } from "perfect-freehand";
 
 import type { DrawStroke, Point, Rectangle } from "./types";
 
-const PRESSURE_SIZE_MULTIPLIER = 1.5;
+const PRESSURE_SIZE_MULTIPLIER = 1.35;
 
 type CachedStrokeGeometry = {
   signature: number;
@@ -108,8 +108,8 @@ function buildStrokeGeometry(stroke: DrawStroke, signature: number): CachedStrok
   const outline = getStroke(inputPoints as number[][], {
     simulatePressure: stroke.simulatePressure,
     size: stroke.width * PRESSURE_SIZE_MULTIPLIER,
-    thinning: 0.7,
-    smoothing: 0.5,
+    thinning: 0.45,
+    smoothing: 0.45,
     streamline: 0.1,
     easing: (value) => Math.sin((value * Math.PI) / 2),
     last: true,
