@@ -50,6 +50,7 @@ export type StrokeStyle = {
   strokeColor?: string;
   strokeWidth?: number;
   opacity?: number;
+  simulatePressure?: boolean;
 };
 
 export type PlaybackOptions = StrokeStyle & {
