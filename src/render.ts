@@ -1,6 +1,5 @@
 import { canvas, context } from "./dom";
 import { drawEraserTrail } from "./erase";
-import { getStrokePathData } from "./freeDraw";
 import { getSelectionBounds, normalizeRectangle } from "./selection";
 import {
   ERASE_TOOL,
@@ -13,30 +12,44 @@ import {
 } from "./state";
 import type { DrawStroke, Point } from "./types";
 
+export function configureStrokeStyle(strokeColor: string, strokeWidth: number): void {
+  context.globalCompositeOperation = "source-over";
+  context.strokeStyle = strokeColor;
+  context.lineWidth = strokeWidth;
+  context.lineCap = "round";
+  context.lineJoin = "round";
+}
+
 export function drawStroke(stroke: DrawStroke, strokeColor = stroke.color, opacity = 1): void {
   if (stroke.points.length === 0) {
     return;
   }
 
-  const pathData = getStrokePathData(stroke);
-
   context.save();
   context.globalAlpha = stroke.opacity * opacity;
-  context.globalCompositeOperation = "source-over";
+  configureStrokeStyle(strokeColor, stroke.width);
+  context.beginPath();
+  context.moveTo(stroke.points[0].x, stroke.points[0].y);
 
-  if (pathData) {
-    context.fillStyle = strokeColor;
-    context.fill(new Path2D(pathData));
-  } else {
-    context.strokeStyle = strokeColor;
-    context.lineWidth = stroke.width;
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    context.beginPath();
-    context.moveTo(stroke.points[0].x, stroke.points[0].y);
+  if (stroke.points.length === 1) {
     context.lineTo(stroke.points[0].x + 0.01, stroke.points[0].y + 0.01);
-    context.stroke();
+  } else if (stroke.points.length === 2) {
+    context.lineTo(stroke.points[1].x, stroke.points[1].y);
+  } else {
+    for (let index = 1; index < stroke.points.length - 1; index += 1) {
+      const current = stroke.points[index];
+      const next = stroke.points[index + 1];
+      const midpointX = (current.x + next.x) / 2;
+      const midpointY = (current.y + next.y) / 2;
+      context.quadraticCurveTo(current.x, current.y, midpointX, midpointY);
+    }
+
+    const penultimate = stroke.points[stroke.points.length - 2];
+    const last = stroke.points[stroke.points.length - 1];
+    context.quadraticCurveTo(penultimate.x, penultimate.y, last.x, last.y);
   }
+
+  context.stroke();
   context.restore();
 }
 

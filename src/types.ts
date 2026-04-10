@@ -14,8 +14,6 @@ export type TrailVector = [x: number, y: number, pressure: number];
 export type DrawStroke = {
   id: number;
   points: Point[];
-  pressures: number[];
-  simulatePressure: boolean;
   color: string;
   width: number;
   opacity: number;

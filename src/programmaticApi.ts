@@ -7,7 +7,6 @@ import type { DrawStroke, Point } from "./types";
 export type ScenePoint = {
   x: number;
   y: number;
-  pressure?: number;
 };
 
 export type CubicBezierSegment = {
@@ -51,7 +50,6 @@ export type StrokeStyle = {
   strokeColor?: string;
   strokeWidth?: number;
   opacity?: number;
-  simulatePressure?: boolean;
 };
 
 export type PlaybackOptions = StrokeStyle & {
@@ -441,23 +439,10 @@ function normalizeInputPoints(points: readonly ScenePoint[]): ScenePoint[] {
   }
 
   if (points.length === 1) {
-    return [points[0], { x: points[0].x + 0.01, y: points[0].y + 0.01, pressure: points[0].pressure }];
+    return [points[0], { x: points[0].x + 0.01, y: points[0].y + 0.01 }];
   }
 
   return points.map((point) => ({ ...point }));
-}
-
-function shouldSimulatePressure(points: readonly ScenePoint[], style: StrokeStyle): boolean {
-  if (typeof style.simulatePressure === "boolean") {
-    return style.simulatePressure;
-  }
-
-  return !points.some((point) => typeof point.pressure === "number");
-}
-
-function applyStrokeInput(stroke: DrawStroke, inputPoints: readonly ScenePoint[]): void {
-  stroke.points = inputPoints.map(({ x, y }) => ({ x, y }));
-  stroke.pressures = stroke.simulatePressure ? [] : inputPoints.map((point) => point.pressure ?? 0.5);
 }
 
 function resolveStyle(style: StrokeStyle) {
@@ -469,24 +454,17 @@ function resolveStyle(style: StrokeStyle) {
 }
 
 function createStroke(points: readonly ScenePoint[], style: StrokeStyle, groupId: number | null): DrawStroke {
-  const normalizedPoints = normalizeInputPoints(points);
   const runtimeStyle = resolveStyle(style);
-  const simulatePressure = shouldSimulatePressure(normalizedPoints, style);
 
-  const stroke: DrawStroke = {
+  return {
     id: state.nextStrokeId++,
-    points: [],
-    pressures: [],
-    simulatePressure,
+    points: normalizeInputPoints(points),
     color: runtimeStyle.color,
     width: runtimeStyle.width,
     opacity: runtimeStyle.opacity,
     groupId,
     rotation: 0,
   };
-
-  applyStrokeInput(stroke, normalizedPoints);
-  return stroke;
 }
 
 function insertStroke(points: readonly ScenePoint[], style: StrokeStyle, groupId: number | null): DrawStroke {
@@ -595,7 +573,7 @@ function createProgrammaticPlayback(
   };
 
   const updateStrokePoints = (nextPointCount: number) => {
-    applyStrokeInput(stroke, normalizeInputPoints(sampledPoints.slice(0, clamp(nextPointCount, 1, sampledPoints.length))));
+    stroke.points = normalizeInputPoints(sampledPoints.slice(0, clamp(nextPointCount, 1, sampledPoints.length)));
     redraw();
   };
 
