@@ -277,6 +277,22 @@ function getGlyphBounds(strokes: readonly BezierStroke[]) {
   };
 }
 
+function isLowercaseGlyph(char: string): boolean {
+  return char.toLowerCase() === char && char.toUpperCase() !== char;
+}
+
+function isLowercaseAscenderGlyph(char: string): boolean {
+  return "bdfhklt".includes(char);
+}
+
+function isLowercaseFullSizeGlyph(char: string): boolean {
+  return false;
+}
+
+function isLowercaseDescenderGlyph(char: string): boolean {
+  return "gpqyj".includes(char);
+}
+
 function normalizeGlyphDefinition({ char, strokes, advance }: NormalizeGlyphOptions): GlyphDefinition {
   const hasSegments = strokes.some((stroke) => stroke.segments.length > 0);
 
@@ -292,25 +308,46 @@ function normalizeGlyphDefinition({ char, strokes, advance }: NormalizeGlyphOpti
 
   const bounds = getGlyphBounds(strokes);
   const scale = bounds.height || bounds.width || 1;
+  const normalizedWidth = bounds.width / scale;
+  const normalizedHeight = bounds.height / scale || 1;
+  const normalizedAdvance =
+    typeof advance === "number" ? advance / scale : normalizedWidth + DEFAULT_GLYPH_ADVANCE;
+  const normalizedPadding = normalizedAdvance - normalizedWidth;
+  const isLowercase = isLowercaseGlyph(char);
+  const isAscenderLowercase = isLowercase && isLowercaseAscenderGlyph(char);
+  const isFullSizeLowercase = isLowercase && (isAscenderLowercase || isLowercaseFullSizeGlyph(char));
+  const isDescenderLowercase = isLowercase && isLowercaseDescenderGlyph(char);
+  const lowercaseXScale = isLowercase ? (isFullSizeLowercase || isDescenderLowercase ? 1 : 0.5) : 1;
+  const lowercaseYScale = isLowercase ? (isFullSizeLowercase || isDescenderLowercase ? 1 : 0.5) : 1;
+  const lowercaseYOffset = isLowercase ? (isDescenderLowercase ? 0.5 : isFullSizeLowercase ? 0 : 0.5) : 0;
 
   return {
     char,
-    width: bounds.width / scale,
-    height: bounds.height / scale || 1,
-    advance: typeof advance === "number" ? advance / scale : bounds.width / scale + DEFAULT_GLYPH_ADVANCE,
+    width: normalizedWidth * lowercaseXScale,
+    height: normalizedHeight * lowercaseYScale,
+    advance: normalizedWidth * lowercaseXScale + normalizedPadding,
     strokes: strokes.map((stroke) => ({
       segments: stroke.segments.map((segment) => ({
-        start: { x: (segment.start.x - bounds.minX) / scale, y: (segment.start.y - bounds.minY) / scale },
-        control1: { x: (segment.control1.x - bounds.minX) / scale, y: (segment.control1.y - bounds.minY) / scale },
+        start: {
+          x: ((segment.start.x - bounds.minX) / scale) * lowercaseXScale,
+          y: lowercaseYOffset + ((segment.start.y - bounds.minY) / scale) * lowercaseYScale,
+        },
+        control1: {
+          x: ((segment.control1.x - bounds.minX) / scale) * lowercaseXScale,
+          y: lowercaseYOffset + ((segment.control1.y - bounds.minY) / scale) * lowercaseYScale,
+        },
         ...(segment.control2
           ? {
               control2: {
-                x: (segment.control2.x - bounds.minX) / scale,
-                y: (segment.control2.y - bounds.minY) / scale,
+                x: ((segment.control2.x - bounds.minX) / scale) * lowercaseXScale,
+                y: lowercaseYOffset + ((segment.control2.y - bounds.minY) / scale) * lowercaseYScale,
               },
             }
           : {}),
-        end: { x: (segment.end.x - bounds.minX) / scale, y: (segment.end.y - bounds.minY) / scale },
+        end: {
+          x: ((segment.end.x - bounds.minX) / scale) * lowercaseXScale,
+          y: lowercaseYOffset + ((segment.end.y - bounds.minY) / scale) * lowercaseYScale,
+        },
       })),
     })),
   };
