@@ -179,7 +179,7 @@
           <div>
             <h3 aria-hidden="true">Stroke</h3>
             <div>
-              <div role="dialog" aria-modal="true" class="color-picker-container">
+              <div class="color-picker-container">
                 <div class="color-picker__top-picks" role="group" aria-label="Stroke color">
                   <button class="color-picker__button active" type="button" title="#1e1e1e" data-stroke-color="#1e1e1e" style="--swatch-color: #1e1e1e;">
                     <div class="color-picker__button-outline"></div>
@@ -198,19 +198,9 @@
                   </button>
                 </div>
                 <div class="draw-panel-divider" aria-hidden="true"></div>
-                <button
-                  type="button"
-                  aria-haspopup="dialog"
-                  aria-expanded="false"
-                  data-state="closed"
-                  class="color-picker__button active-color properties-trigger"
-                  aria-label="Stroke"
-                  title="Show stroke color picker"
-                  data-openpopup="elementStroke"
-                  style="--swatch-color: #1e1e1e;"
-                >
+                <div class="color-picker__current" aria-hidden="true" style="--swatch-color: #1e1e1e;">
                   <div class="color-picker__button-outline"></div>
-                </button>
+                </div>
               </div>
             </div>
           </div>

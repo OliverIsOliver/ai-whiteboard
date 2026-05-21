@@ -22,7 +22,7 @@ export const strokeColorButtons = Array.from(document.querySelectorAll<HTMLButto
 export const strokeWidthInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="stroke-width"]'));
 export const opacityInput = document.querySelector<HTMLInputElement>(".draw-panel__range");
 export const opacityValue = document.querySelector<HTMLElement>(".draw-panel__value");
-export const activeStrokeColorButton = document.querySelector<HTMLElement>('[data-openpopup="elementStroke"]');
+export const currentStrokeColorSwatch = document.querySelector<HTMLElement>(".color-picker__current");
 export const zoomOutButton = document.querySelector<HTMLButtonElement>(".zoom-out-button");
 export const zoomResetButton = document.querySelector<HTMLButtonElement>(".reset-zoom-button");
 export const zoomInButton = document.querySelector<HTMLButtonElement>(".zoom-in-button");

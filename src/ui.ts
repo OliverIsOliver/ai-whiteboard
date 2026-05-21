@@ -1,6 +1,6 @@
 import {
-  activeStrokeColorButton,
   canvas,
+  currentStrokeColorSwatch,
   drawPanel,
   mainMenuDropdown,
   mainMenuTrigger,
@@ -82,8 +82,8 @@ export function syncDrawControls(): void {
     input.closest(".width-option")?.classList.toggle("active", isActive);
   });
 
-  if (activeStrokeColorButton) {
-    activeStrokeColorButton.style.setProperty("--swatch-color", DRAW_TOOL.strokeColor);
+  if (currentStrokeColorSwatch) {
+    currentStrokeColorSwatch.style.setProperty("--swatch-color", DRAW_TOOL.strokeColor);
   }
 
   if (opacityInput) {
